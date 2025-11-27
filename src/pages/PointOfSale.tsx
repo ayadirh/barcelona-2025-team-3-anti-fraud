@@ -13,8 +13,16 @@ export function PointOfSale() {
   } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
+  // Show tickets based on user role
   const myTickets = useMemo(() => {
-    return individualTickets.filter(t => t.originalSupplierId === currentUser?.id);
+    if (currentUser?.role === 'supplier') {
+      // Suppliers see tickets they originally issued
+      return individualTickets.filter(t => t.originalSupplierId === currentUser?.id);
+    } else if (currentUser?.role === 'distributor') {
+      // Distributors see tickets they currently own
+      return individualTickets.filter(t => t.currentOwnerId === currentUser?.id);
+    }
+    return [];
   }, [individualTickets, currentUser]);
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
@@ -29,6 +37,13 @@ export function PointOfSale() {
       markTicketAsUsed(selectedTicket.individualTicketId);
       setSelectedTicket(null);
       setSearchQuery('');
+    }
+  };
+  const handleBack = () => {
+    if (currentUser?.role === 'supplier') {
+      navigate('/supplier/dashboard');
+    } else {
+      navigate('/distributor/dashboard');
     }
   };
   const getStatusColor = (status: string) => {
@@ -66,7 +81,7 @@ export function PointOfSale() {
               Validate and redeem tickets at entrance
             </p>
           </div>
-          <Button variant="secondary" onClick={() => navigate('/supplier/dashboard')}>
+          <Button variant="secondary" onClick={handleBack}>
             Back to Dashboard
           </Button>
         </div>

@@ -26,6 +26,19 @@ function ProtectedRoute({
   }
   return <>{children}</>;
 }
+function AuthenticatedRoute({
+  children
+}: {
+  children: React.ReactNode;
+}) {
+  const {
+    currentUser
+  } = useApp();
+  if (!currentUser) {
+    return <Navigate to="/" replace />;
+  }
+  return <>{children}</>;
+}
 function AppRoutes() {
   return <>
       <Navigation />
@@ -39,9 +52,9 @@ function AppRoutes() {
         <Route path="/supplier/issue-ticket" element={<ProtectedRoute role="supplier">
               <IssueTicket />
             </ProtectedRoute>} />
-        <Route path="/point-of-sale" element={<ProtectedRoute role="supplier">
+        <Route path="/point-of-sale" element={<AuthenticatedRoute>
               <PointOfSale />
-            </ProtectedRoute>} />
+            </AuthenticatedRoute>} />
         <Route path="/distributor/register" element={<DistributorRegistration />} />
         <Route path="/distributor/login" element={<DistributorLogin />} />
         <Route path="/distributor/dashboard" element={<ProtectedRoute role="distributor">
