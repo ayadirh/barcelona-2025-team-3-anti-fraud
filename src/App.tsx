@@ -10,6 +10,7 @@ import { IssueTicket } from './pages/IssueTicket';
 import { DistributorRegistration } from './pages/DistributorRegistration';
 import { DistributorLogin } from './pages/DistributorLogin';
 import { DistributorDashboard } from './pages/DistributorDashboard';
+import { PointOfSale } from './pages/PointOfSale';
 function ProtectedRoute({
   children,
   role
@@ -37,6 +38,9 @@ function AppRoutes() {
             </ProtectedRoute>} />
         <Route path="/supplier/issue-ticket" element={<ProtectedRoute role="supplier">
               <IssueTicket />
+            </ProtectedRoute>} />
+        <Route path="/point-of-sale" element={<ProtectedRoute role="supplier">
+              <PointOfSale />
             </ProtectedRoute>} />
         <Route path="/distributor/register" element={<DistributorRegistration />} />
         <Route path="/distributor/login" element={<DistributorLogin />} />
