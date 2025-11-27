@@ -1,9 +1,13 @@
 import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { Card } from '../components/Card';
+import { Pagination } from '../components/Pagination';
+const ITEMS_PER_PAGE = 10;
 export function DistributorDashboard() {
+  const navigate = useNavigate();
   const {
     tickets,
     individualTickets,
@@ -34,6 +38,8 @@ export function DistributorDashboard() {
     ticket: null,
     price: ''
   });
+  const [purchasedTicketsPage, setPurchasedTicketsPage] = useState(1);
+  const [resaleListingsPage, setResaleListingsPage] = useState(1);
   const filteredTickets = useMemo(() => {
     if (!dateRange.startDate || !dateRange.endDate) {
       return tickets;
@@ -54,6 +60,20 @@ export function DistributorDashboard() {
   const availableResaleTickets = useMemo(() => {
     return individualTickets.filter(t => t.currentOwnerId !== currentUser?.id && t.status === 'available_for_resale');
   }, [individualTickets, currentUser]);
+  // Pagination for purchased tickets
+  const paginatedPurchasedTickets = useMemo(() => {
+    const startIndex = (purchasedTicketsPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return myPurchasedTickets.slice(startIndex, endIndex);
+  }, [myPurchasedTickets, purchasedTicketsPage]);
+  const purchasedTicketsTotalPages = Math.ceil(myPurchasedTickets.length / ITEMS_PER_PAGE);
+  // Pagination for resale listings
+  const paginatedResaleListings = useMemo(() => {
+    const startIndex = (resaleListingsPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return myResaleTickets.slice(startIndex, endIndex);
+  }, [myResaleTickets, resaleListingsPage]);
+  const resaleListingsTotalPages = Math.ceil(myResaleTickets.length / ITEMS_PER_PAGE);
   const stats = useMemo(() => {
     const available = filteredTickets.filter(t => t.status === 'Available');
     const sold = filteredTickets.filter(t => t.status === 'Sold');
@@ -97,9 +117,14 @@ export function DistributorDashboard() {
   };
   return <div className="min-h-screen bg-neutral-50 py-12">
       <div className="max-w-7xl mx-auto px-6">
-        <h1 className="text-3xl font-semibold text-neutral-900 mb-8">
-          Distributor Dashboard
-        </h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-semibold text-neutral-900">
+            Distributor Dashboard
+          </h1>
+          <Button variant="secondary" onClick={() => navigate('/point-of-sale')}>
+            Point of Sale
+          </Button>
+        </div>
 
         <Card className="mb-8">
           <h2 className="text-lg font-semibold text-neutral-900 mb-4">
@@ -150,13 +175,13 @@ export function DistributorDashboard() {
           </Card>
         </div>
 
-        {/* Purchased Tickets Section */}
+        {/* Purchased Tickets Section with Pagination */}
         {myPurchasedTickets.length > 0 && <Card className="mb-8">
             <h2 className="text-xl font-semibold text-neutral-900 mb-6">
               My Purchased Tickets ({myPurchasedTickets.length})
             </h2>
             <div className="space-y-4">
-              {myPurchasedTickets.map(ticket => <div key={ticket.individualTicketId} className="border border-neutral-200 rounded-lg p-6">
+              {paginatedPurchasedTickets.map(ticket => <div key={ticket.individualTicketId} className="border border-neutral-200 rounded-lg p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <h3 className="text-lg font-semibold text-neutral-900 mb-1">
@@ -204,15 +229,17 @@ export function DistributorDashboard() {
                   </Button>
                 </div>)}
             </div>
+
+            <Pagination currentPage={purchasedTicketsPage} totalPages={purchasedTicketsTotalPages} onPageChange={setPurchasedTicketsPage} />
           </Card>}
 
-        {/* My Resale Listings */}
+        {/* My Resale Listings with Pagination */}
         {myResaleTickets.length > 0 && <Card className="mb-8">
             <h2 className="text-xl font-semibold text-neutral-900 mb-6">
               My Resale Listings ({myResaleTickets.length})
             </h2>
             <div className="space-y-4">
-              {myResaleTickets.map(ticket => <div key={ticket.individualTicketId} className="border border-neutral-200 rounded-lg p-6">
+              {paginatedResaleListings.map(ticket => <div key={ticket.individualTicketId} className="border border-neutral-200 rounded-lg p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <h3 className="text-lg font-semibold text-neutral-900 mb-1">
@@ -244,6 +271,8 @@ export function DistributorDashboard() {
                   </div>
                 </div>)}
             </div>
+
+            <Pagination currentPage={resaleListingsPage} totalPages={resaleListingsTotalPages} onPageChange={setResaleListingsPage} />
           </Card>}
 
         {/* Available Tickets */}

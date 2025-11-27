@@ -17,7 +17,7 @@ export function SupplierDashboard() {
     const totalSold = myTickets.reduce((sum, t) => sum + (t.quantity - t.remainingQuantity), 0);
     const totalAvailable = myTickets.reduce((sum, t) => sum + t.remainingQuantity, 0);
     const purchasedTickets = myIndividualTickets.filter(t => t.status === 'purchased');
-    const resoldTickets = myIndividualTickets.filter(t => t.currentOwnerId !== currentUser?.id && t.status !== 'used');
+    const resoldTickets = myIndividualTickets.filter(t => t.status === 'available_for_resale');
     const usedTickets = myIndividualTickets.filter(t => t.status === 'used');
     return {
       totalIssued,
@@ -28,11 +28,11 @@ export function SupplierDashboard() {
       totalUsed: usedTickets.length,
       totalBulkTickets: myTickets.length
     };
-  }, [myTickets, myIndividualTickets, currentUser]);
+  }, [myTickets, myIndividualTickets]);
   const getTicketDetails = (bulkTicketId: string) => {
     const relatedIndividualTickets = myIndividualTickets.filter(t => t.bulkTicketId === bulkTicketId);
     const purchased = relatedIndividualTickets.filter(t => t.status === 'purchased').length;
-    const resold = relatedIndividualTickets.filter(t => t.currentOwnerId !== currentUser?.id && t.status !== 'used').length;
+    const resold = relatedIndividualTickets.filter(t => t.status === 'available_for_resale').length;
     const used = relatedIndividualTickets.filter(t => t.status === 'used').length;
     return {
       purchased,
@@ -94,12 +94,14 @@ export function SupplierDashboard() {
             </p>
           </Card>
           <Card>
-            <div className="text-sm text-neutral-600 mb-1">Resold</div>
+            <div className="text-sm text-neutral-600 mb-1">
+              Listed for Resale
+            </div>
             <div className="text-3xl font-semibold text-neutral-900">
               {stats.totalResold}
             </div>
             <p className="text-xs text-neutral-500 mt-2">
-              Tickets resold to other distributors
+              Tickets distributors are reselling
             </p>
           </Card>
           <Card>
@@ -185,7 +187,9 @@ export function SupplierDashboard() {
                             </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-neutral-600">Resold:</span>
+                            <span className="text-neutral-600">
+                              Listed for Resale:
+                            </span>
                             <span className="font-medium text-blue-600">
                               {details.resold}
                             </span>
